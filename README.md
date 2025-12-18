@@ -3,7 +3,7 @@ This project presents a machine learning based approach for automatically detect
 
 The pipeline used in this project is as follows:
 
-**Step 1: Obtaning the data from cryoPPP (Dataset used:10061)**
+## Step 1: Obtaning the data from cryoPPP (Dataset used:10061)
 
 Each dataset will contain two folders. micrographs and ground_truth
 
@@ -19,7 +19,7 @@ ground_truth : This folder contains coordinates of the false_positives and true 
 
 A list of micrographs + two sets of points per micrograph (true vs false)
 
-**Step 2: Preprocessing the dataset**
+## Step 2: Preprocessing the dataset
 
 Before training the model micrographs were divided into smaller, fixed size patches (64×64 px). 
 
@@ -33,7 +33,7 @@ Code used : data_preprocessing.ipynb
 
 A dataset of labeled patches as 'BAD' or 'GOOD'
 	
-**Step 3: Adding FFT as a second view** 
+## Step 3: Adding FFT as a second view 
 
 For each patch compute a FFT patch (the Fast Fourier Transform (FFT) of the patch converts the image from real space into frequency space to reveal repeating patterns and structural regularities)
 
@@ -45,6 +45,8 @@ Thick ice reduces high-frequency content, causing the signal to drop off.
 
 Using both real-space and FFT information allows the model to mimic how cryo-EM experts visually assess ice quality.
 
+Code used : 
+
 **Output of Step 3:**
 
 Each patch from step 2 becomes:
@@ -53,7 +55,7 @@ Input =[real_patch, fft_patch]
 	
 Label = GOOD or BAD
 	
-**Step 4: Training a CNN classifier** 
+## Step 4: Training a CNN classifier 
 
 Input: a patch and its FFT
 
@@ -63,9 +65,9 @@ Output: probability the patch is BAD (artifact-like)
 
 A trained CNN that can score any patch {Porb(BAD | patch)}
 
-Code used : FFT_model_building.ipynb
+Code used : model_building.ipynb
 	
-**Step 5: Scan a whole micrograph to create an ice mask**
+## Step 5: Scan a whole micrograph to create an ice mask
 
 Move a square window across the micrograph (sliding window)
 
