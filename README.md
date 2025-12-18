@@ -1,4 +1,7 @@
-# ML-Cryo-EM-ice-detection-hacakthon
+# Cryo-EM-ice-detection-Mic-hacakthon
+This project presents a machine learning based approach for automatically detecting ice contamination in cryo-electron microscopy (cryo-EM) micrographs. Using expert-curated annotations from the CryoPPP dataset (EMPIAR-10532), image patches are labeled as 'BAD' and "GOOD' and used to train a convolutional Neural Network.
+
+The pipeline used in this project is as follows:
 
 Step1: Inputs from CryoPPP 
 	Micrograph: a 2D image recorded by the detector (e.g., .mrc)
