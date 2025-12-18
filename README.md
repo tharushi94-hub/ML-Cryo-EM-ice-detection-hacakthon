@@ -11,13 +11,13 @@ micrographs : This folder contains all the 2D images recorded by the detector.
 
 ground_truth : This folder contains coordinates of the false_positives and true particles.
 
-	True particle coordinates: points where experts say “this is a real particle”
+True particle coordinates: points where experts say “this is a real particle”
 	
-	False-positive coordinates: points where experts say “this is not a particle” (often ice/contamination/carbon)
+False-positive coordinates: points where experts say “this is not a particle” (often ice/contamination/carbon)
 	
 Output of Step 1:
 
-	A list of micrographs + two sets of points per micrograph (true vs false)
+A list of micrographs + two sets of points per micrograph (true vs false)
 
 Step 2: Preprocessing the dataset
 
@@ -29,9 +29,9 @@ GOOD Patches (clean): Square patches centered on true particle coordiates (x,y) 
 
 Code used : data_preprocessing.ipynb
 	
-Output of Step 2
+Output of Step 2:
 
-	A dataset of labeled patches as 'BAD' or 'GOOD'
+A dataset of labeled patches as 'BAD' or 'GOOD'
 	
 Step 3: Adding FFT as a second view 
 
@@ -47,11 +47,11 @@ Using both real-space and FFT information allows the model to mimic how cryo-EM 
 
 Output of Step 3
 
-	Each patch from step 2 becomes:
+Each patch from step 2 becomes:
 	
-	Input =[real_patch, fft_patch]
+Input =[real_patch, fft_patch]
 	
-	Label = GOOD or BAD
+Label = GOOD or BAD
 	
 Step 4: Training a CNN classifier 
 
@@ -61,7 +61,7 @@ Output: probability the patch is BAD (artifact-like)
 
 Output of Step 4
 
-	A trained CNN that can score any patch {Porb(BAD | patch)}
+A trained CNN that can score any patch {Porb(BAD | patch)}
 
 Code used : FFT_model_building.ipynb
 	
@@ -76,11 +76,11 @@ The trained CNN outputs P(BAD)
 Combine all probabilities into a 2D map over the micrograph
 
 Output of Step 5
-	An artifact probability map
+An artifact probability map
 	
-	A binary mask after thresholding:
+A binary mask after thresholding:
 	
-	1 = good region
+1 = good region
 	
-	0 = bad region (ice/artifacts)
+0 = bad region (ice/artifacts)
 	
