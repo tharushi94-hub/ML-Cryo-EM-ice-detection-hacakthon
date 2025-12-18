@@ -78,6 +78,7 @@ The trained CNN outputs P(BAD)
 Combine all probabilities into a 2D map over the micrograph
 
 **Output of Step 5:**
+
 An artifact probability map
 	
 A binary mask after thresholding:
