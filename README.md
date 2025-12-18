@@ -1,77 +1,60 @@
 # Cryo-EM-ice-detection-Mic-hacakthon
-This project presents a machine learning based approach for automatically detecting ice contamination in cryo-electron microscopy (cryo-EM) micrographs. Using expert-curated annotations from the CryoPPP dataset (EMPIAR-10532), image patches are labeled as 'BAD' and "GOOD' and used to train a convolutional Neural Network.
+This project presents a machine learning based approach for automatically detecting ice contamination in cryo-electron microscopy (cryo-EM) micrographs. Using expert-curated annotations from the CryoPPP dataset (EMPIAR-10532), image patches are labeled as 'BAD' or "GOOD' and used to train a convolutional Neural Network to classify if the patches are real or contaminated.
 
 The pipeline used in this project is as follows:
 
-Step1: Inputs from CryoPPP 
-	Micrograph: a 2D image recorded by the detector (e.g., .mrc)
-	True particle coordinates: points where experts say “this is a real particle”
-	False-positive coordinates: points where experts say “this is not a particle” (often ice/contamination/carbon)
+Step 1: Obtaning the data from cryoPPP (Dataset used:10532)
+	Each dataset will contain two folders. micrographs and ground_truth
+	micrographs : This folder contains all the 2D images recorded by the detector.
+	ground_truth : This folder contains coordinates of the false_positives and true particles.
+		True particle coordinates: points where experts say “this is a real particle”
+		False-positive coordinates: points where experts say “this is not a particle” (often ice/contamination/carbon)
 	
-Output of Step 1
-	A list of micrographs + two sets of points per micrograph (true vs false)
+	Output of Step 1:
+		A list of micrographs + two sets of points per micrograph (true vs false)
 
-Step2: Build training examples (patch)
+Step 2: Preprocessing the dataset
+	Before training the model micrographs were divided into smaller, fixed size patches (64×64 px). 
 
-2A. BAD patches (artifact-enriched)
-	For every false-positive coordinate (x, y), extract a square patch centered there (e.g., 256×256 px).
-	Label = BAD
-	Rationale: false positives are often caused by ice artifacts or contamination that look particle-like.
+	BAD patches (artifact-enriched) : Square patches centered on false positive coordiates (x,y) were labeled as 'BAD'
+	GOOD Patches (clean): Square patches centered on true particle coordiates (x,y) were labeled as 'GOOD'
 
-2B. GOOD patches (clean background)
-	Randomly choose patch centers in “empty” regions, but require they are:
-	far from any false-positive point
-	far from any true particle point
-	Label = GOOD
-	Rationale: avoids including real protein or known artifact neighborhoods.
-
-Output of Step 2
-	A dataset of many labeled patches
+	Code used : data_preprocessing.ipynb
 	
-Step3: Add FFT as a second view (optional)
-	For each patch, compute:
-	real-space patch (what it looks like)
-
-FFT “power spectrum” patch (what repeating patterns exist)
-An FFT (Fast Fourier Transform) converts an image patch from:
-real space (pixels) to frequency space (patterns of repeating structure)
-
-Why this helps:
-Crystalline ice produces strong ring patterns in frequency space (power spectrum).
-Thick ice reduces high-frequency content (signal “drops off”).
-
-In cryo-EM, people often look at the power spectrum / FFT to judge ice quality—this just makes the model do something similar.
-
-Output of Step 3
-	Each training example becomes:
-		Input =[real_patch, fft_patch]
-		Label = GOOD or BAD
+	Output of Step 2
+		A dataset of labeled patches as 'BAD' or 'GOOD'
 	
-Step 4 — Train a CNN classifier
-	Training task
-	Input: a patch (and optionally its FFT)
+Step 3: Adding FFT as a second view 
+	For each patch compute a FFT patch (the Fast Fourier Transform (FFT) of the patch converts the image from real space into frequency space to reveal repeating patterns and structural regularities)
+
+	Why this helps:
+	Crystalline ice produces characteristic ring patterns in frequency space.
+	Thick ice reduces high-frequency content, causing the signal to drop off.
+	Using both real-space and FFT information allows the model to mimic how cryo-EM experts visually assess ice quality.
+
+	Output of Step 3
+		Each patch from step 2 becomes:
+			Input =[real_patch, fft_patch]
+			Label = GOOD or BAD
+	
+Step 4: Training a CNN classifier 
+	Input: a patch and its FFT
 	Output: probability the patch is BAD (artifact-like)
 
-Output of Step 4
-	A trained CNN that can score any patch:
-	P(BAD | patch)
+	Output of Step 4
+		A trained CNN that can score any patch {Porb(BAD | patch)}
 
-Step 5 — Scan a whole micrograph to create an ice mask
+	Code used : FFT_model_building.ipynb
+	
+Step 5: Scan a whole micrograph to create an ice mask
 	Move a square window across the micrograph (sliding window)
-	For each location:
-		extract patch (+ FFT)
-		CNN outputs P(BAD)
+	For each location extract a patch (+ FFT)
+	The traned CNN outputs P(BAD)
 	Combine all probabilities into a 2D map over the micrograph
 
-Output of Step 5
-	An artifact probability map
-	A binary mask after thresholding:
-	1 = good region
-	0 = bad region (ice/artifacts)
+	Output of Step 5
+		An artifact probability map
+		A binary mask after thresholding:
+		1 = good region
+		0 = bad region (ice/artifacts)
 	
-Step 6 — “Delete” ice artifacts safely (masking)
-	Set BAD regions to 0/NaN for visualization, or
-	Exclude BAD regions during particle picking and filtering
-
-Output of Step 6
-	A micrograph mask + a filtered particle set (remove particles that land in BAD regions)
