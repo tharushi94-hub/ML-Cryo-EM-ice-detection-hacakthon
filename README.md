@@ -45,7 +45,7 @@ Thick ice reduces high-frequency content, causing the signal to drop off.
 
 Using both real-space and FFT information allows the model to mimic how cryo-EM experts visually assess ice quality.
 
-Code used : 
+Code used : computing_fft_patches.ipynb
 
 **Output of Step 3:**
 
